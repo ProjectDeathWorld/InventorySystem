@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Record Sale{% endblock %}
+
+{% block content %}
+<h1>Record Sale</h1>
+
+<form method="post">
+    <label for="product_id">Select Product:</label>
+    <select name="product_id" id="product_id" required>
+        {% for product in products %}
+            <option value="{{ product.id }}">{{ product.name }} (Stock: {{ product.stock }})</option>
+        {% endfor %}
+    </select>
+
+    <label for="quantity">Quantity:</label>
+    <input type="number" name="quantity" id="quantity" min="1" required>
+
+    <button type="submit">Record Sale</button>
+</form>
+
+<br>
+<a href="/">← Back to Inventory</a>
+{% endblock %}

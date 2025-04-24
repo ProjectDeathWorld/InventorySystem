@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Sales History{% endblock %}
+
+{% block content %}
+<h1>Sales History</h1>
+
+<div style="margin-bottom: 20px;">
+    <a href="/"><button>← Back to Inventory</button></a>
+</div>
+
+<table>
+    <tr>
+        <th>Sale ID</th>
+        <th>Product Name</th>
+        <th>Quantity</th>
+        <th>Sale Date</th>
+    </tr>
+    {% for sale in sales %}
+    <tr>
+        <td>{{ sale.id }}</td>
+        <td>{{ sale.product_name }}</td>
+        <td>{{ sale.quantity }}</td>
+        <td>{{ sale.sale_date }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

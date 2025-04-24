@@ -1,0 +1,101 @@
+from flask import Flask, render_template, request, redirect, url_for
+import sqlite3
+
+app = Flask(__name__)
+DATABASE = 'inventory.db'
+
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# Home - List all products
+@app.route('/')
+def index():
+    conn = get_db_connection()
+    products = conn.execute('SELECT * FROM products').fetchall()
+    conn.close()
+    return render_template('index.html', products=products)
+
+# Add Product
+@app.route('/add', methods=('GET', 'POST'))
+def add_product():
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        price = float(request.form['price'])
+        stock = int(request.form['stock'])
+
+        conn = get_db_connection()
+        conn.execute('INSERT INTO products (name, description, price, stock) VALUES (?, ?, ?, ?)',
+                     (name, description, price, stock))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('index'))
+    return render_template('add_product.html')
+
+# Edit Product
+@app.route('/edit/<int:id>', methods=('GET', 'POST'))
+def edit_product(id):
+    conn = get_db_connection()
+    product = conn.execute('SELECT * FROM products WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        price = float(request.form['price'])
+        stock = int(request.form['stock'])
+
+        conn.execute('UPDATE products SET name = ?, description = ?, price = ?, stock = ? WHERE id = ?',
+                     (name, description, price, stock, id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('index'))
+
+    conn.close()
+    return render_template('edit_product.html', product=product)
+
+# Delete Product
+@app.route('/delete/<int:id>')
+def delete_product(id):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM products WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('index'))
+
+# Record Sale
+@app.route('/sale', methods=('GET', 'POST'))
+def record_sale():
+    conn = get_db_connection()
+    products = conn.execute('SELECT * FROM products').fetchall()
+
+    if request.method == 'POST':
+        product_id = int(request.form['product_id'])
+        quantity = int(request.form['quantity'])
+
+        # Update stock
+        conn.execute('INSERT INTO sales (product_id, quantity) VALUES (?, ?)', (product_id, quantity))
+        conn.execute('UPDATE products SET stock = stock - ? WHERE id = ?', (quantity, product_id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_sales'))
+
+    conn.close()
+    return render_template('record_sale.html', products=products)
+
+# View Sales
+@app.route('/sales')
+def view_sales():
+    conn = get_db_connection()
+    sales = conn.execute('''
+        SELECT sales.id, products.name AS product_name, sales.quantity, sales.sale_date
+        FROM sales
+        JOIN products ON sales.product_id = products.id
+        ORDER BY sales.sale_date DESC
+    ''').fetchall()
+    conn.close()
+    return render_template('sales.html', sales=sales)
+
+if __name__ == '__main__':
+    app.run(debug=True)

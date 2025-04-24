@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Inventory{% endblock %}
+
+{% block content %}
+<h1>Product Inventory</h1>
+
+<div style="margin-bottom: 20px;">
+    <a href="/add"><button>Add Product</button></a>
+    <a href="/sale"><button>Record Sale</button></a>
+    <a href="/sales"><button>View Sales</button></a>
+</div>
+
+<table>
+    <tr>
+        <th>ID</th><th>Name</th><th>Description</th><th>Price</th><th>Stock</th><th>Actions</th>
+    </tr>
+    {% for product in products %}
+    <tr>
+        <td>{{ product.id }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ product.description }}</td>
+        <td>{{ product.price }}</td>
+        <td>{{ product.stock }}</td>
+        <td>
+            <a href="/edit/{{ product.id }}"><button>Edit</button></a>
+            <a href="/delete/{{ product.id }}" onclick="return confirm('Delete this product?')"><button style="background-color: crimson;">Delete</button></a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
