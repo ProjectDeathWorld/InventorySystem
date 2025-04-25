@@ -4,6 +4,7 @@ import sqlite3
 app = Flask(__name__)
 DATABASE = 'inventory.db'
 
+# Connect to database
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
@@ -18,7 +19,7 @@ def index():
     return render_template('index.html', products=products)
 
 # Add Product
-@app.route('/add', methods=('GET', 'POST'))
+@app.route('/add', methods=['GET', 'POST'])
 def add_product():
     if request.method == 'POST':
         name = request.form['name']
@@ -35,7 +36,7 @@ def add_product():
     return render_template('add_product.html')
 
 # Edit Product
-@app.route('/edit/<int:id>', methods=('GET', 'POST'))
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit_product(id):
     conn = get_db_connection()
     product = conn.execute('SELECT * FROM products WHERE id = ?', (id,)).fetchone()
@@ -65,7 +66,7 @@ def delete_product(id):
     return redirect(url_for('index'))
 
 # Record Sale
-@app.route('/sale', methods=('GET', 'POST'))
+@app.route('/sale', methods=['GET', 'POST'])
 def record_sale():
     conn = get_db_connection()
     products = conn.execute('SELECT * FROM products').fetchall()
@@ -83,7 +84,7 @@ def record_sale():
     conn.close()
     return render_template('record_sale.html', products=products)
 
-# View Sales
+# View Sales History
 @app.route('/sales')
 def view_sales():
     conn = get_db_connection()
@@ -119,6 +120,6 @@ def view_customers():
     conn.close()
     return render_template('view_customers.html', customers=customers)
 
-# Run the app
+# Run App
 if __name__ == '__main__':
     app.run(debug=True)
