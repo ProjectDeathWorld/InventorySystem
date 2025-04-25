@@ -74,7 +74,6 @@ def record_sale():
         product_id = int(request.form['product_id'])
         quantity = int(request.form['quantity'])
 
-        # Update stock
         conn.execute('INSERT INTO sales (product_id, quantity) VALUES (?, ?)', (product_id, quantity))
         conn.execute('UPDATE products SET stock = stock - ? WHERE id = ?', (quantity, product_id))
         conn.commit()
@@ -97,5 +96,29 @@ def view_sales():
     conn.close()
     return render_template('sales.html', sales=sales)
 
+# Add Customer
+@app.route('/add_customer', methods=['GET', 'POST'])
+def add_customer():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+
+        conn = get_db_connection()
+        conn.execute("INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)", (name, email, phone))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_customers'))
+    return render_template('add_customer.html')
+
+# View Customers
+@app.route('/view_customers')
+def view_customers():
+    conn = get_db_connection()
+    customers = conn.execute("SELECT * FROM customers").fetchall()
+    conn.close()
+    return render_template('view_customers.html', customers=customers)
+
+# Run the app
 if __name__ == '__main__':
     app.run(debug=True)
