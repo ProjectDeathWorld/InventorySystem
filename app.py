@@ -21,19 +21,29 @@ def index():
 # Add Product
 @app.route('/add', methods=['GET', 'POST'])
 def add_product():
+    conn = get_db_connection()
+
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
         price = float(request.form['price'])
         stock = int(request.form['stock'])
+        cost_price = float(request.form['cost_price'])
+        category_id = int(request.form['category_id'])
+        supplier_id = int(request.form['supplier_id'])
 
-        conn = get_db_connection()
-        conn.execute('INSERT INTO products (name, description, price, stock) VALUES (?, ?, ?, ?)',
-                     (name, description, price, stock))
+        conn.execute('''
+            INSERT INTO products (name, description, price, stock, cost_price, category_id, supplier_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (name, description, price, stock, cost_price, category_id, supplier_id))
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
-    return render_template('add_product.html')
+
+    categories = conn.execute('SELECT * FROM categories').fetchall()
+    suppliers = conn.execute('SELECT * FROM suppliers').fetchall()
+    conn.close()
+    return render_template('add_product.html', categories=categories, suppliers=suppliers)
 
 # Edit Product
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
@@ -46,65 +56,64 @@ def edit_product(id):
         description = request.form['description']
         price = float(request.form['price'])
         stock = int(request.form['stock'])
+        cost_price = float(request.form['cost_price'])
+        category_id = int(request.form['category_id'])
+        supplier_id = int(request.form['supplier_id'])
 
-        conn.execute('UPDATE products SET name = ?, description = ?, price = ?, stock = ? WHERE id = ?',
-                     (name, description, price, stock, id))
+        conn.execute('''
+            UPDATE products SET name = ?, description = ?, price = ?, stock = ?, cost_price = ?, category_id = ?, supplier_id = ?
+            WHERE id = ?
+        ''', (name, description, price, stock, cost_price, category_id, supplier_id, id))
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
 
+    categories = conn.execute('SELECT * FROM categories').fetchall()
+    suppliers = conn.execute('SELECT * FROM suppliers').fetchall()
     conn.close()
-    return render_template('edit_product.html', product=product)
-
-# Delete Product
-@app.route('/delete/<int:id>')
-def delete_product(id):
-    conn = get_db_connection()
-    conn.execute('DELETE FROM products WHERE id = ?', (id,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('index'))
+    return render_template('edit_product.html', product=product, categories=categories, suppliers=suppliers)
 
 # Record Sale
 @app.route('/sale', methods=['GET', 'POST'])
 def record_sale():
-    conn = sqlite3.connect('inventory.db')
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
+    conn = get_db_connection()
+    products = conn.execute('SELECT * FROM products').fetchall()
+    customers = conn.execute('SELECT * FROM customers').fetchall()
 
     if request.method == 'POST':
-        product_id = request.form['product_id']
+        product_id = int(request.form['product_id'])
+        customer_id = int(request.form['customer_id'])
         quantity = int(request.form['quantity'])
 
-        # Get product price and cost
-        cur.execute("SELECT price, cost_price FROM Products WHERE id = ?", (product_id,))
-        result = cur.fetchone()
-        selling_price = result["price"]
-        cost_price = result["cost_price"]
+        product = conn.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
+        cost_price = product['cost_price']
+        selling_price = product['price']
 
         selling_total = selling_price * quantity
         cost_total = cost_price * quantity
+        profit = selling_total - cost_total
 
-        # Insert into Sales table
-        cur.execute("INSERT INTO Sales (product_id, quantity, sale_date) VALUES (?, ?, date('now'))", (product_id, quantity))
-        sale_id = cur.lastrowid
+        conn.execute('''
+            INSERT INTO sales (product_id, customer_id, quantity) 
+            VALUES (?, ?, ?)
+        ''', (product_id, customer_id, quantity))
 
-        # Insert into Profit table
-        cur.execute("INSERT INTO Profit (sale_id, cost_price_total, selling_price_total) VALUES (?, ?, ?)",
-                    (sale_id, cost_total, selling_total))
+        sale_id = conn.lastrowid
+        conn.execute('''
+            INSERT INTO profit (sale_id, cost_price_total, selling_price_total, profit_amount)
+            VALUES (?, ?, ?, ?)
+        ''', (sale_id, cost_total, selling_total, profit))
 
-        # Update stock
-        cur.execute("UPDATE Products SET stock = stock - ? WHERE id = ?", (quantity, product_id))
+        conn.execute('''
+            UPDATE products SET stock = stock - ? WHERE id = ?
+        ''', (quantity, product_id))
 
         conn.commit()
         conn.close()
-        return redirect('/sales')
+        return redirect(url_for('view_sales'))
 
-    # For GET request
-    cur.execute("SELECT * FROM Products")
-    products = cur.fetchall()
     conn.close()
-    return render_template('record_sale.html', products=products)
+    return render_template('record_sale.html', products=products, customers=customers)
 
 # View Sales History
 @app.route('/sales')
@@ -119,80 +128,21 @@ def view_sales():
     conn.close()
     return render_template('sales.html', sales=sales)
 
-# Add Customer
-@app.route('/add_customer', methods=['GET', 'POST'])
-def add_customer():
-    if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        phone = request.form['phone']
-
-        conn = get_db_connection()
-        conn.execute("INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)", (name, email, phone))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('view_customers'))
-    return render_template('add_customer.html')
-
-# View Customers
-@app.route('/view_customers')
-def view_customers():
-    conn = get_db_connection()
-    customers = conn.execute("SELECT * FROM customers").fetchall()
-    conn.close()
-    return render_template('view_customers.html', customers=customers)
-
-@app.route('/add_supplier', methods=['GET', 'POST'])
-def add_supplier():
-    if request.method == 'POST':
-        name = request.form['name']
-        contact = request.form['contact']
-        address = request.form['address']
-        conn = sqlite3.connect('inventory.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO suppliers (name, contact, address) VALUES (?, ?, ?)", (name, contact, address))
-        conn.commit()
-        conn.close()
-        return redirect('/suppliers')
-    return render_template('add_supplier.html')
-
-@app.route('/suppliers')
-def view_suppliers():
-    conn = sqlite3.connect('inventory.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM suppliers")
-    suppliers = c.fetchall()
-    conn.close()
-    return render_template('view_suppliers.html', suppliers=suppliers)
-
-@app.route('/categories', methods=['GET', 'POST'])
-def categories():
-    conn = sqlite3.connect('inventory.db')
-    c = conn.cursor()
-    
-    if request.method == 'POST':
-        category_name = request.form['name']
-        try:
-            c.execute("INSERT INTO categories (name) VALUES (?)", (category_name,))
-            conn.commit()
-        except sqlite3.IntegrityError:
-            pass  # category already exists
-    
-    c.execute("SELECT * FROM categories")
-    categories = c.fetchall()
-    conn.close()
-    
-    return render_template('categories.html', categories=categories)
-
+# View Profit Report
 @app.route('/profit')
 def view_profit():
-    conn = sqlite3.connect('inventory.db')
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    cur.execute("SELECT * FROM Profit")
+    
+    cur.execute('SELECT * FROM profit')
     profits = cur.fetchall()
+
+    cur.execute('SELECT SUM(profit_amount) FROM profit')
+    total_profit = cur.fetchone()[0] or 0
+
     conn.close()
-    return render_template('profit.html', profits=profits)
+    return render_template('profit.html', profits=profits, total_profit=total_profit)
 
 # Run App
 if __name__ == '__main__':

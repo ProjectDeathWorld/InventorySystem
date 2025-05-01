@@ -1,25 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product</title>
 </head>
 <body>
     <h1>Add New Product</h1>
     <form method="post">
-        <label>Name:</label><br>
-        <input type="text" name="name" required><br><br>
+        <label for="name">Name:</label>
+        <input type="text" name="name" required><br>
 
-        <label>Description:</label><br>
-        <textarea name="description"></textarea><br><br>
+        <label for="description">Description:</label>
+        <textarea name="description"></textarea><br>
 
-        <label>Price:</label><br>
-        <input type="number" name="price" step="0.01" required><br><br>
+        <label for="price">Price:</label>
+        <input type="number" name="price" step="0.01" required><br>
 
-        <label>Stock:</label><br>
-        <input type="number" name="stock" required><br><br>
+        <label for="stock">Stock:</label>
+        <input type="number" name="stock" required><br>
+
+        <label for="cost_price">Cost Price:</label>
+        <input type="number" name="cost_price" step="0.01" required><br>
+
+        <label for="category_id">Category:</label>
+        <select name="category_id" required>
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select><br>
+
+        <label for="supplier_id">Supplier:</label>
+        <select name="supplier_id" required>
+            {% for supplier in suppliers %}
+                <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+            {% endfor %}
+        </select><br>
 
         <button type="submit">Add Product</button>
     </form>
+
     <br>
     <a href="/">Back to Inventory</a>
 </body>
