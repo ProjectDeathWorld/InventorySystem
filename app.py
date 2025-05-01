@@ -183,6 +183,22 @@ def view_suppliers():
     conn.close()
     return render_template('view_suppliers.html', suppliers=suppliers)
 
+@app.route('/add_supplier', methods=['GET', 'POST'])
+def add_supplier():
+    if request.method == 'POST':
+        name = request.form['name']
+        contact = request.form['contact']
+        address = request.form['address']
+
+        conn = get_db_connection()
+        conn.execute('INSERT INTO suppliers (name, contact, address) VALUES (?, ?, ?)',
+                     (name, contact, address))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('view_suppliers'))
+
+    return render_template('add_supplier.html')
 
 # Run App
 if __name__ == '__main__':
