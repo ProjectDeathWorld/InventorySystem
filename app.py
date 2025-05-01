@@ -181,7 +181,8 @@ def view_suppliers():
     conn = get_db_connection()
     suppliers = conn.execute('SELECT * FROM suppliers').fetchall()
     conn.close()
-    return render_template('suppliers.html', suppliers=suppliers)
+    return render_template('view_suppliers.html', suppliers=suppliers)
+
 
 # Run App
 if __name__ == '__main__':
