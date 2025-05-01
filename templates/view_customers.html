@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Customer List</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Customers</title>
 </head>
 <body>
-    <h2>Customer List</h2>
-    <table border="1">
+    <h1>Customer List</h1>
+    <table>
         <tr>
-            <th>ID</th><th>Name</th><th>Email</th><th>Phone</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
         </tr>
         {% for customer in customers %}
         <tr>
-            <td>{{ customer[0] }}</td>
-            <td>{{ customer[1] }}</td>
-            <td>{{ customer[2] }}</td>
-            <td>{{ customer[3] }}</td>
+            <td>{{ customer.name }}</td>
+            <td>{{ customer.email }}</td>
+            <td>{{ customer.phone }}</td>
         </tr>
         {% endfor %}
     </table>
     <br>
-    <a href="/">Back to Home</a>
+    <a href="/">Back to Inventory</a>
 </body>
 </html>

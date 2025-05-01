@@ -161,6 +161,14 @@ def add_customer():
 
     return render_template('add_customer.html')
 
+# View Customers
+@app.route('/view_customers')
+def view_customers():
+    conn = get_db_connection()
+    customers = conn.execute('SELECT * FROM customers').fetchall()
+    conn.close()
+    return render_template('view_customers.html', customers=customers)
+
 
 # Run App
 if __name__ == '__main__':
