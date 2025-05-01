@@ -144,6 +144,24 @@ def view_profit():
     conn.close()
     return render_template('profit.html', profits=profits, total_profit=total_profit)
 
+# Add Customer Route
+@app.route('/add_customer', methods=['GET', 'POST'])
+def add_customer():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+
+        conn = get_db_connection()
+        conn.execute('INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)',
+                     (name, email, phone))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('index'))
+
+    return render_template('add_customer.html')
+
+
 # Run App
 if __name__ == '__main__':
     app.run(debug=True)
