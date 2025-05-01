@@ -120,6 +120,49 @@ def view_customers():
     conn.close()
     return render_template('view_customers.html', customers=customers)
 
+@app.route('/add_supplier', methods=['GET', 'POST'])
+def add_supplier():
+    if request.method == 'POST':
+        name = request.form['name']
+        contact = request.form['contact']
+        address = request.form['address']
+        conn = sqlite3.connect('inventory.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO suppliers (name, contact, address) VALUES (?, ?, ?)", (name, contact, address))
+        conn.commit()
+        conn.close()
+        return redirect('/suppliers')
+    return render_template('add_supplier.html')
+
+@app.route('/suppliers')
+def view_suppliers():
+    conn = sqlite3.connect('inventory.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM suppliers")
+    suppliers = c.fetchall()
+    conn.close()
+    return render_template('view_suppliers.html', suppliers=suppliers)
+
+@app.route('/categories', methods=['GET', 'POST'])
+def categories():
+    conn = sqlite3.connect('inventory.db')
+    c = conn.cursor()
+    
+    if request.method == 'POST':
+        category_name = request.form['name']
+        try:
+            c.execute("INSERT INTO categories (name) VALUES (?)", (category_name,))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            pass  # category already exists
+    
+    c.execute("SELECT * FROM categories")
+    categories = c.fetchall()
+    conn.close()
+    
+    return render_template('categories.html', categories=categories)
+
 # Run App
 if __name__ == '__main__':
     app.run(debug=True)
+

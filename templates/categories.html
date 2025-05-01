@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Product Categories{% endblock %}
+
+{% block content %}
+<h1>Product Categories</h1>
+
+<form method="POST">
+    <label for="name">New Category:</label>
+    <input type="text" name="name" required>
+    <button type="submit">Add Category</button>
+</form>
+
+<br>
+
+<table>
+    <tr>
+        <th>ID</th><th>Category Name</th>
+    </tr>
+    {% for category in categories %}
+    <tr>
+        <td>{{ category[0] }}</td>
+        <td>{{ category[1] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+<a href="/"><button>← Back to Inventory</button></a>
+{% endblock %}
