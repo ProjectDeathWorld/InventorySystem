@@ -1,0 +1,32 @@
+<!-- profit.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profit Report</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h2>Profit Report</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Sale ID</th>
+                <th>Cost Price Total</th>
+                <th>Selling Price Total</th>
+                <th>Profit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profit in profits %}
+            <tr>
+                <td>{{ profit.sale_id }}</td>
+                <td>₱{{ profit.cost_price_total }}</td>
+                <td>₱{{ profit.selling_price_total }}</td>
+                <td>₱{{ profit.profit_amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -162,6 +162,16 @@ def categories():
     
     return render_template('categories.html', categories=categories)
 
+@app.route('/profit')
+def view_profit():
+    conn = sqlite3.connect('inventory.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Profit")
+    profits = cur.fetchall()
+    conn.close()
+    return render_template('profit.html', profits=profits)
+
 # Run App
 if __name__ == '__main__':
     app.run(debug=True)
