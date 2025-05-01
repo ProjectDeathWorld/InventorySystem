@@ -169,6 +169,19 @@ def view_customers():
     conn.close()
     return render_template('view_customers.html', customers=customers)
 
+@app.route('/categories')
+def view_categories():
+    conn = get_db_connection()
+    categories = conn.execute('SELECT * FROM categories').fetchall()
+    conn.close()
+    return render_template('categories.html', categories=categories)
+
+@app.route('/suppliers')
+def view_suppliers():
+    conn = get_db_connection()
+    suppliers = conn.execute('SELECT * FROM suppliers').fetchall()
+    conn.close()
+    return render_template('suppliers.html', suppliers=suppliers)
 
 # Run App
 if __name__ == '__main__':
