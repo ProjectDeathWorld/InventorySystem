@@ -40,6 +40,21 @@ def view_customers():
     # Render the 'customers.html' template with the customer data
     return render_template('customers.html', customers=customers)
 
+@app.route('/add_customer', methods=['GET', 'POST'])
+def add_customer():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+        conn.execute('INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)', (name, email, phone))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_customers'))
+    conn.close()
+    return render_template('add_customer.html')
+
+
 # View Suppliers
 @app.route('/suppliers')
 def view_suppliers():
@@ -308,6 +323,40 @@ def add_category():
         return redirect(url_for('view_categories'))
     conn.close()
     return render_template('add_category.html')
+
+@app.route('/stock')
+def view_stock():
+    conn = get_db_connection()
+    stock = conn.execute('''
+        SELECT s.id, p.name AS product, s.quantity, s.last_updated
+        FROM stock s
+        JOIN products p ON s.product_id = p.id
+    ''').fetchall()
+    conn.close()
+    return render_template('stock.html', stock=stock)
+
+@app.route('/add_stock', methods=['GET', 'POST'])
+def add_stock():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        product_id = int(request.form['product_id'])
+        quantity = int(request.form['quantity'])
+
+        # Check if stock record exists
+        existing = conn.execute('SELECT * FROM stock WHERE product_id = ?', (product_id,)).fetchone()
+
+        if existing:
+            conn.execute('UPDATE stock SET quantity = quantity + ?, last_updated = CURRENT_TIMESTAMP WHERE product_id = ?', (quantity, product_id))
+        else:
+            conn.execute('INSERT INTO stock (product_id, quantity) VALUES (?, ?)', (product_id, quantity))
+
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_stock'))
+
+    products = conn.execute('SELECT * FROM products').fetchall()
+    conn.close()
+    return render_template('add_stock.html', products=products)
 
 # Run App
 if __name__ == '__main__':

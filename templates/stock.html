@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Stock{% endblock %}
+{% block content %}
+<h1>Stock Levels</h1>
+<a href="{{ url_for('add_stock') }}"><button>Add Stock</button></a>
+<table>
+  <tr>
+    <th>ID</th><th>Product</th><th>Quantity</th><th>Last Updated</th>
+  </tr>
+  {% for s in stock %}
+  <tr>
+    <td>{{ s.id }}</td>
+    <td>{{ s.product }}</td>
+    <td>{{ s.quantity }}</td>
+    <td>{{ s.last_updated }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
