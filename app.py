@@ -48,6 +48,20 @@ def view_suppliers():
     conn.close()
     return render_template('view_suppliers.html', suppliers=suppliers)
 
+@app.route('/add_supplier', methods=['GET', 'POST'])
+def add_supplier():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        name = request.form['name']
+        contact = request.form['contact']
+        conn.execute('INSERT INTO suppliers (name, contact) VALUES (?, ?)', (name, contact))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_suppliers'))
+    conn.close()
+    return render_template('add_supplier.html')
+
+
 # View Categories
 @app.route('/categories')
 def view_categories():
@@ -64,6 +78,19 @@ def view_brands():
     conn.close()
     return render_template('brands.html', brands=brands)
 
+@app.route('/add_brand', methods=['GET', 'POST'])
+def add_brand():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        name = request.form['name']
+        conn.execute('INSERT INTO brands (name) VALUES (?)', (name,))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_brands'))
+    conn.close()
+    return render_template('add_brand.html')
+
+
 # View Employees
 @app.route('/employees')
 def view_employees():
@@ -71,6 +98,20 @@ def view_employees():
     employees = conn.execute('SELECT * FROM employees').fetchall()
     conn.close()
     return render_template('employees.html', employees=employees)
+
+@app.route('/add_employee', methods=['GET', 'POST'])
+def add_employee():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        name = request.form['name']
+        role = request.form['role']
+        conn.execute('INSERT INTO employees (name, role) VALUES (?, ?)', (name, role))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_employees'))
+    conn.close()
+    return render_template('add_employee.html')
+
 
 # Record Sale with Sale_Items
 @app.route('/record_sale', methods=['GET', 'POST'])

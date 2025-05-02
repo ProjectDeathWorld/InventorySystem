@@ -2,7 +2,7 @@
 
 {% block content %}
 <h2>Employees</h2>
-<a href="#" class="btn btn-primary mb-2">Add New Employee</a>
+<a href="{{ url_for('add_employee') }}"><button>Add Employee</button></a>
 <table class="table table-bordered">
     <thead>
         <tr>
