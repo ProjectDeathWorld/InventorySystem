@@ -171,6 +171,62 @@ def view_inventory_logs():
     conn.close()
     return render_template('inventory_logs.html', logs=logs)
 
+# Add Product
+@app.route('/add_product', methods=['GET', 'POST'])
+def add_product():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        name = request.form['name']
+        price = float(request.form['price'])
+        stock = int(request.form['stock'])
+        cost_price = float(request.form['cost_price'])
+        category_id = int(request.form['category_id'])
+        supplier_id = int(request.form['supplier_id'])
+        brand_id = int(request.form['brand_id'])
+
+        conn.execute('''
+            INSERT INTO products (name, price, stock, cost_price, category_id, supplier_id, brand_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (name, price, stock, cost_price, category_id, supplier_id, brand_id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('index'))
+
+    categories = conn.execute('SELECT * FROM categories').fetchall()
+    suppliers = conn.execute('SELECT * FROM suppliers').fetchall()
+    brands = conn.execute('SELECT * FROM brands').fetchall()
+    conn.close()
+    return render_template('add_product.html', categories=categories, suppliers=suppliers, brands=brands)
+
+# Edit Product
+@app.route('/edit_product/<int:id>', methods=['GET', 'POST'])
+def edit_product(id):
+    conn = get_db_connection()
+    if request.method == 'POST':
+        name = request.form['name']
+        price = float(request.form['price'])
+        stock = int(request.form['stock'])
+        cost_price = float(request.form['cost_price'])
+        category_id = int(request.form['category_id'])
+        supplier_id = int(request.form['supplier_id'])
+        brand_id = int(request.form['brand_id'])
+
+        conn.execute('''
+            UPDATE products
+            SET name=?, price=?, stock=?, cost_price=?, category_id=?, supplier_id=?, brand_id=?
+            WHERE id=?
+        ''', (name, price, stock, cost_price, category_id, supplier_id, brand_id, id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('index'))
+
+    product = conn.execute('SELECT * FROM products WHERE id = ?', (id,)).fetchone()
+    categories = conn.execute('SELECT * FROM categories').fetchall()
+    suppliers = conn.execute('SELECT * FROM suppliers').fetchall()
+    brands = conn.execute('SELECT * FROM brands').fetchall()
+    conn.close()
+    return render_template('edit_product.html', product=product, categories=categories, suppliers=suppliers, brands=brands)
+
 # Run App
 if __name__ == '__main__':
     app.run(debug=True)
