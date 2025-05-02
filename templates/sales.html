@@ -3,17 +3,9 @@
 
 {% block content %}
 <h1>Sales History</h1>
-
-<div style="margin-bottom: 20px;">
-    <a href="/"><button>← Back to Inventory</button></a>
-</div>
-
 <table>
     <tr>
-        <th>Sale ID</th>
-        <th>Product Name</th>
-        <th>Quantity</th>
-        <th>Sale Date</th>
+        <th>Sale ID</th><th>Product</th><th>Quantity</th><th>Sale Date</th><th>Actions</th>
     </tr>
     {% for sale in sales %}
     <tr>
@@ -21,7 +13,10 @@
         <td>{{ sale.product_name }}</td>
         <td>{{ sale.quantity }}</td>
         <td>{{ sale.sale_date }}</td>
+        <td><a href="/view_sale/{{ sale.id }}"><button>View</button></a></td>
     </tr>
     {% endfor %}
 </table>
+<a href="/record_sale"><button>Record New Sale</button></a>
+<a href="/"><button>Back to Home</button></a>
 {% endblock %}

@@ -3,31 +3,20 @@
 
 {% block content %}
 <h1>Profit Report</h1>
-
-<!-- Summary Card -->
-<div class="dashboard-card">
-    <h3>Total Profit</h3>
-    <p class="amount">₱{{ total_profit }}</p>
-</div>
-
 <table>
-    <thead>
-        <tr>
-            <th>Sale ID</th>
-            <th>Cost Price Total</th>
-            <th>Selling Price Total</th>
-            <th>Profit</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for profit in profits %}
-        <tr>
-            <td>{{ profit.sale_id }}</td>
-            <td>₱{{ profit.cost_price_total }}</td>
-            <td>₱{{ profit.selling_price_total }}</td>
-            <td>₱{{ profit.profit_amount }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
+    <tr>
+        <th>Sale ID</th><th>Cost Price Total</th><th>Selling Price Total</th><th>Profit</th>
+    </tr>
+    {% for profit in profits %}
+    <tr>
+        <td>{{ profit.sale_id }}</td>
+        <td>{{ profit.cost_price_total }}</td>
+        <td>{{ profit.selling_price_total }}</td>
+        <td>{{ profit.profit_amount }}</td>
+    </tr>
+    {% endfor %}
 </table>
+
+<h2>Total Profit: {{ total_profit }}</h2>
+<a href="/"><button>Back to Home</button></a>
 {% endblock %}

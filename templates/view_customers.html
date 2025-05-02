@@ -1,27 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Customers</title>
-</head>
-<body>
-    <h1>Customer List</h1>
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-        </tr>
-        {% for customer in customers %}
-        <tr>
-            <td>{{ customer.name }}</td>
-            <td>{{ customer.email }}</td>
-            <td>{{ customer.phone }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <br>
-    <a href="/">Back to Inventory</a>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Customers{% endblock %}
+
+{% block content %}
+<h1>Customers</h1>
+<a href="/add_customer"><button>Add New Customer</button></a>
+<table>
+    <tr>
+        <th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th>
+    </tr>
+    {% for customer in customers %}
+    <tr>
+        <td>{{ customer.id }}</td>
+        <td>{{ customer.name }}</td>
+        <td>{{ customer.email }}</td>
+        <td>{{ customer.phone }}</td>
+        <td><a href="/edit_customer/{{ customer.id }}"><button>Edit</button></a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

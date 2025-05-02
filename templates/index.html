@@ -1,25 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Inventory{% endblock %}
+{% block title %}Product List{% endblock %}
 
 {% block content %}
-<h1>Product Inventory</h1>
-
-<!-- Total Profit Dashboard Card -->
-<div class="dashboard-card">
-    <h3>Total Profit</h3>
-    <p class="amount">₱{{ total_profit }}</p>
-</div>
-
-<div style="margin-bottom: 20px;">
-    <a href="/add"><button>Product Table</button></a>
-    <a href="/sale"><button>Record Sale</button></a>
-    <a href="/sales"><button>View Sales</button></a>
-    <a href="{{ url_for('view_customers') }}"><button>View Customers</button></a>
-    <a href="/categories"><button>Product Categories</button></a>
-    <a href="/suppliers"><button>Product Suppliers</button></a>
-    <a href="/profit"><button>Profit Table</button></a>
-</div>
-
+<h1>Product List</h1>
+<a href="/add"><button>Add New Product</button></a>
 <table>
     <tr>
         <th>ID</th><th>Name</th><th>Description</th><th>Price</th><th>Stock</th><th>Actions</th>
@@ -31,10 +15,7 @@
         <td>{{ product.description }}</td>
         <td>{{ product.price }}</td>
         <td>{{ product.stock }}</td>
-        <td>
-            <a href="/edit/{{ product.id }}"><button>Edit</button></a>
-            <a href="/delete/{{ product.id }}" onclick="return confirm('Delete this product?')"><button style="background-color: crimson;">Delete</button></a>
-        </td>
+        <td><a href="/edit/{{ product.id }}"><button>Edit</button></a></td>
     </tr>
     {% endfor %}
 </table>

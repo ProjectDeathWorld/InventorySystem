@@ -2,22 +2,18 @@
 {% block title %}Add Supplier{% endblock %}
 
 {% block content %}
-<h1>Add Supplier</h1>
-
+<h1>Add New Supplier</h1>
 <form method="post">
     <label for="name">Supplier Name:</label>
     <input type="text" name="name" required>
 
     <label for="contact">Contact:</label>
-    <input type="text" name="contact">
+    <input type="text" name="contact" required>
 
     <label for="address">Address:</label>
-    <textarea name="address"></textarea>
+    <input type="text" name="address" required>
 
     <button type="submit">Add Supplier</button>
 </form>
-
-<br>
-<a href="/suppliers"><button>View Suppliers</button></a>
-<a href="/"><button>← Back to Inventory</button></a>
+<a href="/suppliers"><button>Back to Suppliers</button></a>
 {% endblock %}

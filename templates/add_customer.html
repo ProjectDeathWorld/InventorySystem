@@ -1,26 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Customer</title>
-</head>
-<body>
-    <h1>Add Customer</h1>
-    <form method="POST">
-        <label for="name">Name:</label>
-        <input type="text" name="name" required><br>
+{% extends 'base.html' %}
+{% block title %}Add Customer{% endblock %}
 
-        <label for="email">Email:</label>
-        <input type="email" name="email" required><br>
+{% block content %}
+<h1>Add New Customer</h1>
+<form method="post">
+    <label for="name">Customer Name:</label>
+    <input type="text" name="name" required>
 
-        <label for="phone">Phone:</label>
-        <input type="text" name="phone" required><br>
+    <label for="email">Email:</label>
+    <input type="email" name="email" required>
 
-        <button type="submit">Add Customer</button>
-    </form>
+    <label for="phone">Phone:</label>
+    <input type="text" name="phone" required>
 
-    <br>
-    <a href="/">Back to Inventory</a>
-</body>
-</html>
+    <button type="submit">Add Customer</button>
+</form>
+<a href="/view_customers"><button>Back to Customers</button></a>
+{% endblock %}

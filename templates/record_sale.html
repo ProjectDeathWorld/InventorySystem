@@ -1,34 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Record Sale</title>
-</head>
-<body>
-    <h1>Record Sale</h1>
-    <form method="post">
-        <label for="product_id">Select Product:</label>
-        <select name="product_id" id="product_id" required>
-            {% for product in products %}
-                <option value="{{ product.id }}">{{ product.name }} (Stock: {{ product.stock }})</option>
-            {% endfor %}
-        </select>
+{% extends 'base.html' %}
+{% block title %}Record Sale{% endblock %}
 
-        <label for="customer_id">Select Customer:</label>
-        <select name="customer_id" id="customer_id" required>
-            {% for customer in customers %}
-                <option value="{{ customer.id }}">{{ customer.name }}</option>
-            {% endfor %}
-        </select>
+{% block content %}
+<h1>Record Sale</h1>
+<form method="post">
+    <label for="customer_id">Customer:</label>
+    <select name="customer_id">
+        {% for customer in customers %}
+        <option value="{{ customer.id }}">{{ customer.name }}</option>
+        {% endfor %}
+    </select>
 
-        <label for="quantity">Quantity:</label>
-        <input type="number" name="quantity" required><br>
+    <label for="product_id">Product:</label>
+    <select name="product_id">
+        {% for product in products %}
+        <option value="{{ product.id }}">{{ product.name }}</option>
+        {% endfor %}
+    </select>
 
-        <button type="submit">Record Sale</button>
-    </form>
+    <label for="quantity">Quantity:</label>
+    <input type="text" name="quantity" required>
 
-    <br>
-    <a href="/">Back to Inventory</a>
-</body>
-</html>
+    <button type="submit">Record Sale</button>
+</form>
+<a href="/sales"><button>Back to Sales</button></a>
+{% endblock %}

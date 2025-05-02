@@ -1,181 +1,38 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
+from datetime import datetime
 
 app = Flask(__name__)
 DATABASE = 'inventory.db'
 
-# Connect to database
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
 
-# Home - List all products
+# Home Page
 @app.route('/')
 def index():
     conn = get_db_connection()
-    products = conn.execute('SELECT * FROM products').fetchall()
+    products = conn.execute('''
+        SELECT p.*, c.name as category, s.name as supplier, b.name as brand
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        LEFT JOIN suppliers s ON p.supplier_id = s.id
+        LEFT JOIN brands b ON p.brand_id = b.id
+    ''').fetchall()
     conn.close()
     return render_template('index.html', products=products)
 
-# Add Product
-@app.route('/add', methods=['GET', 'POST'])
-def add_product():
-    conn = get_db_connection()
-
-    if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        price = float(request.form['price'])
-        stock = int(request.form['stock'])
-        cost_price = float(request.form['cost_price'])
-        category_id = int(request.form['category_id'])
-        supplier_id = int(request.form['supplier_id'])
-
-        conn.execute('''
-            INSERT INTO products (name, description, price, stock, cost_price, category_id, supplier_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (name, description, price, stock, cost_price, category_id, supplier_id))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('index'))
-
-    categories = conn.execute('SELECT * FROM categories').fetchall()
-    suppliers = conn.execute('SELECT * FROM suppliers').fetchall()
-    conn.close()
-    return render_template('add_product.html', categories=categories, suppliers=suppliers)
-
-# Edit Product
-@app.route('/edit/<int:id>', methods=['GET', 'POST'])
-def edit_product(id):
-    conn = get_db_connection()
-    product = conn.execute('SELECT * FROM products WHERE id = ?', (id,)).fetchone()
-
-    if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        price = float(request.form['price'])
-        stock = int(request.form['stock'])
-        cost_price = float(request.form['cost_price'])
-        category_id = int(request.form['category_id'])
-        supplier_id = int(request.form['supplier_id'])
-
-        conn.execute('''
-            UPDATE products SET name = ?, description = ?, price = ?, stock = ?, cost_price = ?, category_id = ?, supplier_id = ?
-            WHERE id = ?
-        ''', (name, description, price, stock, cost_price, category_id, supplier_id, id))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('index'))
-
-    categories = conn.execute('SELECT * FROM categories').fetchall()
-    suppliers = conn.execute('SELECT * FROM suppliers').fetchall()
-    conn.close()
-    return render_template('edit_product.html', product=product, categories=categories, suppliers=suppliers)
-
-# Record Sale
-@app.route('/sale', methods=['GET', 'POST'])
-def record_sale():
-    conn = get_db_connection()
-    products = conn.execute('SELECT * FROM products').fetchall()
-    customers = conn.execute('SELECT * FROM customers').fetchall()
-
-    if request.method == 'POST':
-        product_id = int(request.form['product_id'])
-        customer_id = int(request.form['customer_id'])
-        quantity = int(request.form['quantity'])
-
-        product = conn.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
-        cost_price = product['cost_price']
-        selling_price = product['price']
-
-        selling_total = selling_price * quantity
-        cost_total = cost_price * quantity
-        profit = selling_total - cost_total
-
-        conn.execute('''
-            INSERT INTO sales (product_id, customer_id, quantity) 
-            VALUES (?, ?, ?)
-        ''', (product_id, customer_id, quantity))
-
-        sale_id = conn.lastrowid
-        conn.execute('''
-            INSERT INTO profit (sale_id, cost_price_total, selling_price_total, profit_amount)
-            VALUES (?, ?, ?, ?)
-        ''', (sale_id, cost_total, selling_total, profit))
-
-        conn.execute('''
-            UPDATE products SET stock = stock - ? WHERE id = ?
-        ''', (quantity, product_id))
-
-        conn.commit()
-        conn.close()
-        return redirect(url_for('view_sales'))
-
-    conn.close()
-    return render_template('record_sale.html', products=products, customers=customers)
-
-# View Sales History
-@app.route('/sales')
-def view_sales():
-    conn = get_db_connection()
-    sales = conn.execute('''
-        SELECT sales.id, products.name AS product_name, sales.quantity, sales.sale_date
-        FROM sales
-        JOIN products ON sales.product_id = products.id
-        ORDER BY sales.sale_date DESC
-    ''').fetchall()
-    conn.close()
-    return render_template('sales.html', sales=sales)
-
-# View Profit Report
-@app.route('/profit')
-def view_profit():
-    conn = get_db_connection()
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    
-    cur.execute('SELECT * FROM profit')
-    profits = cur.fetchall()
-
-    cur.execute('SELECT SUM(profit_amount) FROM profit')
-    total_profit = cur.fetchone()[0] or 0
-
-    conn.close()
-    return render_template('profit.html', profits=profits, total_profit=total_profit)
-
-# Add Customer Route
-@app.route('/add_customer', methods=['GET', 'POST'])
-def add_customer():
-    if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        phone = request.form['phone']
-
-        conn = get_db_connection()
-        conn.execute('INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)',
-                     (name, email, phone))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('index'))
-
-    return render_template('add_customer.html')
-
 # View Customers
-@app.route('/view_customers')
+@app.route('/customers')
 def view_customers():
     conn = get_db_connection()
     customers = conn.execute('SELECT * FROM customers').fetchall()
     conn.close()
     return render_template('view_customers.html', customers=customers)
 
-@app.route('/categories')
-def view_categories():
-    conn = get_db_connection()
-    categories = conn.execute('SELECT * FROM categories').fetchall()
-    conn.close()
-    return render_template('categories.html', categories=categories)
-
+# View Suppliers
 @app.route('/suppliers')
 def view_suppliers():
     conn = get_db_connection()
@@ -183,22 +40,136 @@ def view_suppliers():
     conn.close()
     return render_template('view_suppliers.html', suppliers=suppliers)
 
-@app.route('/add_supplier', methods=['GET', 'POST'])
-def add_supplier():
-    if request.method == 'POST':
-        name = request.form['name']
-        contact = request.form['contact']
-        address = request.form['address']
+# View Categories
+@app.route('/categories')
+def view_categories():
+    conn = get_db_connection()
+    categories = conn.execute('SELECT * FROM categories').fetchall()
+    conn.close()
+    return render_template('categories.html', categories=categories)
 
-        conn = get_db_connection()
-        conn.execute('INSERT INTO suppliers (name, contact, address) VALUES (?, ?, ?)',
-                     (name, contact, address))
+# View Brands
+@app.route('/brands')
+def view_brands():
+    conn = get_db_connection()
+    brands = conn.execute('SELECT * FROM brands').fetchall()
+    conn.close()
+    return render_template('brands.html', brands=brands)
+
+# View Employees
+@app.route('/employees')
+def view_employees():
+    conn = get_db_connection()
+    employees = conn.execute('SELECT * FROM employees').fetchall()
+    conn.close()
+    return render_template('employees.html', employees=employees)
+
+# Record Sale with Sale_Items
+@app.route('/sale', methods=['GET', 'POST'])
+def record_sale():
+    conn = get_db_connection()
+    products = conn.execute('SELECT * FROM products').fetchall()
+    customers = conn.execute('SELECT * FROM customers').fetchall()
+
+    if request.method == 'POST':
+        customer_id = int(request.form['customer_id'])
+        product_id = int(request.form['product_id'])
+        quantity = int(request.form['quantity'])
+        employee_id = int(request.form['employee_id'])  # Assuming logged-in employee or selected manually
+
+        product = conn.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
+        total_price = quantity * product['price']
+
+        # Insert into sales
+        conn.execute('''
+            INSERT INTO sales (customer_id, employee_id, sale_date)
+            VALUES (?, ?, ?)
+        ''', (customer_id, employee_id, datetime.now()))
+        sale_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+
+        # Insert into sale_items
+        conn.execute('''
+            INSERT INTO sale_items (sale_id, product_id, quantity, unit_price)
+            VALUES (?, ?, ?, ?)
+        ''', (sale_id, product_id, quantity, product['price']))
+
+        # Decrease inventory
+        conn.execute('''
+            UPDATE products SET stock = stock - ?
+            WHERE id = ?
+        ''', (quantity, product_id))
+
+        # Insert payment
+        conn.execute('''
+            INSERT INTO payments (sale_id, amount, payment_date)
+            VALUES (?, ?, ?)
+        ''', (sale_id, total_price, datetime.now()))
+
+        # Log inventory movement
+        conn.execute('''
+            INSERT INTO inventory_logs (product_id, quantity, action, date)
+            VALUES (?, ?, ?, ?)
+        ''', (product_id, -quantity, 'sale', datetime.now()))
+
         conn.commit()
         conn.close()
+        return redirect(url_for('view_sales'))
 
-        return redirect(url_for('view_suppliers'))
+    employees = conn.execute('SELECT * FROM employees').fetchall()
+    conn.close()
+    return render_template('record_sale.html', products=products, customers=customers, employees=employees)
 
-    return render_template('add_supplier.html')
+# View Sales
+@app.route('/sales')
+def view_sales():
+    conn = get_db_connection()
+    sales = conn.execute('''
+        SELECT sales.id, customers.name AS customer, employees.name AS employee, sales.sale_date
+        FROM sales
+        LEFT JOIN customers ON sales.customer_id = customers.id
+        LEFT JOIN employees ON sales.employee_id = employees.id
+        ORDER BY sales.sale_date DESC
+    ''').fetchall()
+    conn.close()
+    return render_template('sales.html', sales=sales)
+
+# View Sale Items
+@app.route('/sale_items')
+def view_sale_items():
+    conn = get_db_connection()
+    sale_items = conn.execute('''
+        SELECT si.id, s.id AS sale_id, p.name AS product, si.quantity, si.unit_price
+        FROM sale_items si
+        JOIN sales s ON si.sale_id = s.id
+        JOIN products p ON si.product_id = p.id
+    ''').fetchall()
+    conn.close()
+    return render_template('sale_items.html', sale_items=sale_items)
+
+# View Payments
+@app.route('/payments')
+def view_payments():
+    conn = get_db_connection()
+    payments = conn.execute('''
+        SELECT p.id, s.id AS sale_id, p.amount, p.payment_date
+        FROM payments p
+        JOIN sales s ON p.sale_id = s.id
+    ''').fetchall()
+    conn.close()
+    return render_template('payments.html', payments=payments)
+
+# View Inventory Logs
+@app.route('/inventory_logs')
+def view_inventory_logs():
+    conn = get_db_connection()
+    logs = conn.execute('''
+        SELECT l.id, p.name AS product, l.quantity, l.action, l.date
+        FROM inventory_logs l
+        JOIN products p ON l.product_id = p.id
+        ORDER BY l.date DESC
+    ''').fetchall()
+    conn.close()
+    return render_template('inventory_logs.html', logs=logs)
 
 # Run App
 if __name__ == '__main__':

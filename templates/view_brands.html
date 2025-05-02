@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Brands{% endblock %}
+
+{% block content %}
+<h1>Brands</h1>
+<a href="/add_brand"><button>Add New Brand</button></a>
+<table>
+    <tr>
+        <th>ID</th><th>Name</th><th>Actions</th>
+    </tr>
+    {% for brand in brands %}
+    <tr>
+        <td>{{ brand.id }}</td>
+        <td>{{ brand.name }}</td>
+        <td><a href="/edit_brand/{{ brand.id }}"><button>Edit</button></a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

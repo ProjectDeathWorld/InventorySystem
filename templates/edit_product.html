@@ -1,26 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Product</title>
-</head>
-<body>
-    <h1>Edit Product</h1>
-    <form method="post">
-        <label>Name:</label><br>
-        <input type="text" name="name" value="{{ product.name }}" required><br><br>
+{% extends 'base.html' %}
+{% block title %}Edit Product{% endblock %}
 
-        <label>Description:</label><br>
-        <textarea name="description">{{ product.description }}</textarea><br><br>
+{% block content %}
+<h1>Edit Product</h1>
+<form method="post">
+    <label for="name">Product Name:</label>
+    <input type="text" name="name" value="{{ product.name }}" required>
 
-        <label>Price:</label><br>
-        <input type="number" name="price" value="{{ product.price }}" step="0.01" required><br><br>
+    <label for="description">Description:</label>
+    <input type="text" name="description" value="{{ product.description }}" required>
 
-        <label>Stock:</label><br>
-        <input type="number" name="stock" value="{{ product.stock }}" required><br><br>
+    <label for="price">Price:</label>
+    <input type="text" name="price" value="{{ product.price }}" required>
 
-        <button type="submit">Update Product</button>
-    </form>
-    <br>
-    <a href="/">Back to Inventory</a>
-</body>
-</html>
+    <label for="stock">Stock:</label>
+    <input type="text" name="stock" value="{{ product.stock }}" required>
+
+    <label for="cost_price">Cost Price:</label>
+    <input type="text" name="cost_price" value="{{ product.cost_price }}" required>
+
+    <label for="category_id">Category:</label>
+    <select name="category_id">
+        {% for category in categories %}
+        <option value="{{ category.id }}" {% if category.id == product.category_id %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="supplier_id">Supplier:</label>
+    <select name="supplier_id">
+        {% for supplier in suppliers %}
+        <option value="{{ supplier.id }}" {% if supplier.id == product.supplier_id %}selected{% endif %}>{{ supplier.name }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="brand_id">Brand:</label>
+    <select name="brand_id">
+        {% for brand in brands %}
+        <option value="{{ brand.id }}" {% if brand.id == product.brand_id %}selected{% endif %}>{{ brand.name }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Update Product</button>
+</form>
+<a href="/"><button>Back to Home</button></a>
+{% endblock %}

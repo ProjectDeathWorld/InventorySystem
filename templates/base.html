@@ -1,10 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>{% block title %}Inventory System{% endblock %}</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Inventory Management{% endblock %}</title>
 </head>
 <body>
-    {% block content %}{% endblock %}
+    <header>
+        <nav>
+            <a href="/">Home</a> |
+            <a href="/categories">Categories</a> |
+            <a href="/suppliers">Suppliers</a> |
+            <a href="/brands">Brands</a> |
+            <a href="/employees">Employees</a> |
+            <a href="/view_customers">Customers</a> |
+            <a href="/sales">Sales</a> |
+            <a href="/inventory_logs">Inventory Logs</a> |
+            <a href="/payments">Payments</a>
+        </nav>
+    </header>
+
+    <div>
+        {% block content %}{% endblock %}
+    </div>
 </body>
 </html>

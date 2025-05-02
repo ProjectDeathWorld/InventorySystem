@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Add Brand{% endblock %}
+
+{% block content %}
+<h1>Add New Brand</h1>
+<form method="post">
+    <label for="name">Brand Name:</label>
+    <input type="text" name="name" required>
+
+    <button type="submit">Add Brand</button>
+</form>
+<a href="/brands"><button>Back to Brands</button></a>
+{% endblock %}
