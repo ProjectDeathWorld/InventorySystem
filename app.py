@@ -231,6 +231,23 @@ def edit_product(id):
     conn.close()
     return render_template('edit_product.html', product=product, categories=categories, suppliers=suppliers, brands=brands)
 
+@app.route('/record_payment', methods=['GET', 'POST'])
+def record_payment():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        customer_id = request.form['customer_id']
+        amount = request.form['amount']
+        conn.execute(
+            'INSERT INTO payments (customer_id, amount) VALUES (?, ?)',
+            (customer_id, amount)
+        )
+        conn.commit()
+        conn.close()
+        return redirect('/payments')
+    customers = conn.execute('SELECT * FROM customers').fetchall()
+    conn.close()
+    return render_template('record_payment.html', customers=customers)
+
 # Run App
 if __name__ == '__main__':
     app.run(debug=True)
