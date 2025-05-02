@@ -3,21 +3,23 @@
 
 {% block content %}
 <h1>Payments</h1>
-<table border="1">
+
+<table border="1" cellpadding="5" cellspacing="0">
     <tr>
         <th>ID</th>
-        <th>Customer ID</th>
+        <th>Customer</th>
         <th>Amount</th>
         <th>Payment Date</th>
     </tr>
     {% for payment in payments %}
     <tr>
         <td>{{ payment.id }}</td>
-        <td>{{ payment.customer_id }}</td>
+        <td>{{ payment.customer_name if payment.customer_name else payment.customer_id }}</td>
         <td>{{ payment.amount }}</td>
         <td>{{ payment.payment_date }}</td>
     </tr>
     {% endfor %}
 </table>
+
 <a href="/"><button>Back to Home</button></a>
 {% endblock %}

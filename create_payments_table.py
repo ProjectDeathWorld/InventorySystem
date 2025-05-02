@@ -11,7 +11,7 @@ def create_payments_table():
             amount REAL NOT NULL,
             payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (customer_id) REFERENCES customers(id)
-        );
+        )
     ''')
 
     conn.commit()
