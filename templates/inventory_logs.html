@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Inventory Logs{% endblock %}
+
+{% block content %}
+<h1>Inventory Logs</h1>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Product ID</th>
+        <th>Quantity</th>
+        <th>Action</th>
+        <th>Date</th>
+    </tr>
+    {% for log in logs %}
+    <tr>
+        <td>{{ log.id }}</td>
+        <td>{{ log.product_id }}</td>
+        <td>{{ log.quantity }}</td>
+        <td>{{ log.action }}</td>
+        <td>{{ log.date }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="/"><button>Back to Home</button></a>
+{% endblock %}
