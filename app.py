@@ -40,6 +40,21 @@ def view_customers():
     # Render the 'customers.html' template with the customer data
     return render_template('customers.html', customers=customers)
 
+@app.route('/customers')
+def view_customers():
+    conn = sqlite3.connect('inventory.db')
+    cursor = conn.cursor()
+
+    # Query the customers from the database
+    cursor.execute("SELECT * FROM customers")
+    customers = cursor.fetchall()
+
+    # Close the database connection
+    conn.close()
+
+    # Render the 'customers.html' template with the customer data
+    return render_template('customers.html', customers=customers)
+
 
 # View Suppliers
 @app.route('/suppliers')
