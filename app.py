@@ -64,45 +64,57 @@ def view_employees():
     conn.close()
     return render_template('employees.html', employees=employees)
 
-# Record Sale
+# Record Sale with Sale_Items
 @app.route('/record_sale', methods=['GET', 'POST'])
 def record_sale():
     conn = get_db_connection()
+    products = conn.execute('SELECT * FROM products').fetchall()
+    customers = conn.execute('SELECT * FROM customers').fetchall()
+
     if request.method == 'POST':
         customer_id = int(request.form['customer_id'])
         product_id = int(request.form['product_id'])
         quantity = int(request.form['quantity'])
-        employee_id = int(request.form['employee_id'])
+        employee_id = int(request.form['employee_id'])  # Get employee_id from form
 
         product = conn.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
         total_price = quantity * product['price']
 
-        # Create sale
-        conn.execute('INSERT INTO sales (customer_id, employee_id, sale_date) VALUES (?, ?, ?)',
-                     (customer_id, employee_id, datetime.now()))
+        # Insert into sales
+        conn.execute(''' 
+            INSERT INTO sales (customer_id, employee_id, sale_date) 
+            VALUES (?, ?, ?)
+        ''', (customer_id, employee_id, datetime.now()))
         sale_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
 
-        # Sale item
-        conn.execute('INSERT INTO sale_items (sale_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)',
-                     (sale_id, product_id, quantity, product['price']))
+        # Insert into sale_items
+        conn.execute(''' 
+            INSERT INTO sale_items (sale_id, product_id, quantity, unit_price) 
+            VALUES (?, ?, ?, ?)
+        ''', (sale_id, product_id, quantity, product['price']))
 
         # Decrease inventory
-        conn.execute('UPDATE products SET stock = stock - ? WHERE id = ?', (quantity, product_id))
+        conn.execute(''' 
+            UPDATE products SET stock = stock - ? 
+            WHERE id = ?
+        ''', (quantity, product_id))
 
-        # Payment
-        conn.execute('INSERT INTO payments (sale_id, amount, payment_date) VALUES (?, ?, ?)',
-                     (sale_id, total_price, datetime.now()))
+        # Insert payment
+        conn.execute(''' 
+            INSERT INTO payments (sale_id, amount, payment_date) 
+            VALUES (?, ?, ?)
+        ''', (sale_id, total_price, datetime.now()))
 
-        # Inventory log
-        conn.execute('INSERT INTO inventory_logs (product_id, quantity, action, date) VALUES (?, ?, ?, ?)',
-                     (product_id, -quantity, 'sale', datetime.now()))
+        # Log inventory movement
+        conn.execute(''' 
+            INSERT INTO inventory_logs (product_id, quantity, action, date) 
+            VALUES (?, ?, ?, ?)
+        ''', (product_id, -quantity, 'sale', datetime.now()))
 
         conn.commit()
         conn.close()
         return redirect(url_for('view_sales'))
 
-    products = conn.execute('SELECT * FROM products').fetchall()
-    customers = conn.execute('SELECT * FROM customers').fetchall()
     employees = conn.execute('SELECT * FROM employees').fetchall()
     conn.close()
     return render_template('record_sale.html', products=products, customers=customers, employees=employees)

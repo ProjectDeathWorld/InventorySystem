@@ -21,6 +21,13 @@
     <label for="quantity">Quantity:</label>
     <input type="text" name="quantity" required>
 
+    <label for="employee_id">Employee:</label>
+    <select name="employee_id">
+        {% for employee in employees %}
+        <option value="{{ employee.id }}">{{ employee.name }}</option>
+        {% endfor %}
+    </select>
+
     <button type="submit">Record Sale</button>
 </form>
 <a href="/sales"><button>Back to Sales</button></a>
