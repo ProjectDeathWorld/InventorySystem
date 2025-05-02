@@ -256,6 +256,18 @@ def record_payment():
     conn.close()
     return render_template('record_payment.html', customers=customers)
 
+@app.route('/add_category', methods=['GET', 'POST'])
+def add_category():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        name = request.form['name']
+        conn.execute('INSERT INTO categories (name) VALUES (?)', (name,))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_categories'))
+    conn.close()
+    return render_template('add_category.html')
+
 # Run App
 if __name__ == '__main__':
     app.run(debug=True)

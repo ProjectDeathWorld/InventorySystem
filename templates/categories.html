@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>Categories</h1>
-<a href="/add_category"><button>Add New Category</button></a>
+<a href="{{ url_for('add_category') }}"><button>Add Category</button></a>
 <table>
     <tr>
         <th>ID</th><th>Name</th><th>Actions</th>
