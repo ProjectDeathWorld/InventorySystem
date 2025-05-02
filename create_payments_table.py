@@ -1,20 +1,25 @@
 import sqlite3
 
-def create_payments_table():
-    conn = sqlite3.connect('inventory.db')
-    cursor = conn.cursor()
+# Connect to the database
+conn = sqlite3.connect('inventory.db')
+cursor = conn.cursor()
 
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS payments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            customer_id INTEGER NOT NULL,
-            amount REAL NOT NULL,
-            payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (customer_id) REFERENCES customers(id)
-        )
-    ''')
+# Delete the old payments table if it exists
+cursor.execute("DROP TABLE IF EXISTS payments")
 
-    conn.commit()
-    conn.close()
+# Create a new payments table with sale_id
+cursor.execute('''
+    CREATE TABLE payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sale_id) REFERENCES sales(id)
+    )
+''')
 
-create_payments_table()
+# Save changes and close the connection
+conn.commit()
+conn.close()
+
+print("Payments table recreated successfully with sale_id.")
