@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>Product List</h1>
-<a href="/add"><button>Add New Product</button></a>
+<a href="{{ url_for('add_product') }}"><button>Add New Product</button></a>
 <table>
     <tr>
         <th>ID</th><th>Name</th><th>Description</th><th>Price</th><th>Stock</th><th>Actions</th>

@@ -202,7 +202,7 @@ def add_product():
         ''', (name, price, stock, cost_price, category_id, supplier_id, brand_id))
         conn.commit()
         conn.close()
-        return redirect(url_for('index'))
+        return redirect(url_for('index'))  # Redirect back to the homepage
 
     categories = conn.execute('SELECT * FROM categories').fetchall()
     suppliers = conn.execute('SELECT * FROM suppliers').fetchall()
