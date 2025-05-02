@@ -27,10 +27,19 @@ def index():
 # View Customers
 @app.route('/customers')
 def view_customers():
-    conn = get_db_connection()
-    customers = conn.execute('SELECT * FROM customers').fetchall()
+    conn = sqlite3.connect('inventory.db')
+    cursor = conn.cursor()
+    
+    # Query the customers from the database
+    cursor.execute("SELECT * FROM customers")
+    customers = cursor.fetchall()
+    
+    # Close the database connection
     conn.close()
-    return render_template('view_customers.html', customers=customers)
+    
+    # Render the 'customers.html' template with the customer data
+    return render_template('customers.html', customers=customers)
+
 
 # View Suppliers
 @app.route('/suppliers')
