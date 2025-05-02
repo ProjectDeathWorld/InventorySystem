@@ -227,6 +227,49 @@ def edit_product(id):
     conn.close()
     return render_template('edit_product.html', product=product, categories=categories, suppliers=suppliers, brands=brands)
 
+@app.route('/record_sale', methods=['GET', 'POST'])
+def record_sale():
+    conn = sqlite3.connect('inventory.db')
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        customer_id = request.form['customer_id']
+        # Handle sale creation, add customer_id to your INSERT
+
+        conn.execute('INSERT INTO sales (sale_date, customer_id) VALUES (?, ?)',
+                     (datetime.now().strftime('%Y-%m-%d'), customer_id))
+        conn.commit()
+        conn.close()
+        return redirect('/sales')
+
+    # For GET request - get customers
+    customers = conn.execute('SELECT id, name FROM customers').fetchall()
+    conn.close()
+    return render_template('record_sale.html', customers=customers)
+
+@app.route('/sales')
+def view_sales():
+    conn = sqlite3.connect('inventory.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    sales = cursor.execute('''
+        SELECT 
+            sales.id,
+            customers.name AS customer_name,
+            products.name AS product_name,
+            sale_items.quantity,
+            sales.sale_date
+        FROM sales
+        JOIN customers ON sales.customer_id = customers.id
+        JOIN sale_items ON sales.id = sale_items.sale_id
+        JOIN products ON sale_items.product_id = products.id
+        ORDER BY sales.sale_date DESC
+    ''').fetchall()
+    conn.close()
+
+    return render_template('sales.html', sales=sales)
+
 # Run App
 if __name__ == '__main__':
     app.run(debug=True)
