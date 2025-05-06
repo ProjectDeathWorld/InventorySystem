@@ -7,155 +7,130 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            padding: 40px;
+            margin: 30px;
+            background-color: #f9f9f9;
         }
-        .selector-card {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            width: 400px;
-        }
-        .selector-card h2 {
-            margin-bottom: 20px;
-            text-align: center;
+        .selector-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: auto;
         }
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             font-weight: bold;
         }
-        select, input[type="number"] {
+        select, input {
             width: 100%;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 8px;
             border: 1px solid #ccc;
-            font-size: 14px;
+            border-radius: 5px;
         }
-        .readonly-box {
-            background-color: #f9f9f9;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            background-color: #28a745;
-            color: white;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
+        .price-display {
+            font-size: 1.1em;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="selector-card">
-        <h2>Select a Product</h2>
+    <div class="selector-container">
+        <h2>Select Product</h2>
         <div class="form-group">
-            <label for="category">Category</label>
-            <select id="category" name="category">
+            <label for="category">Category:</label>
+            <select id="category">
                 <option value="">-- Select Category --</option>
-                <!-- Options will be populated by JavaScript -->
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
             </select>
         </div>
+
         <div class="form-group">
-            <label for="brand">Brand</label>
-            <select id="brand" name="brand" disabled>
+            <label for="brand">Brand:</label>
+            <select id="brand">
                 <option value="">-- Select Brand --</option>
             </select>
         </div>
+
         <div class="form-group">
-            <label for="product">Product</label>
-            <select id="product" name="product" disabled>
+            <label for="product">Product:</label>
+            <select id="product">
                 <option value="">-- Select Product --</option>
             </select>
         </div>
+
         <div class="form-group">
-            <label>Cost</label>
-            <div class="readonly-box" id="cost">₱0.00</div>
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" min="1" value="1">
         </div>
-        <div class="form-group">
-            <label for="quantity">Quantity</label>
-            <input type="number" id="quantity" name="quantity" min="1" placeholder="Enter quantity">
+
+        <div class="price-display">
+            <strong>Cost: </strong><span id="cost">₱0.00</span>
         </div>
-        <button type="submit">Add to Cart</button>
     </div>
 
     <script>
-        // This is placeholder data - replace with actual AJAX in real use
-        const data = {
-            Electronics: {
-                Samsung: [
-                    { name: "Galaxy S21", cost: 39990 },
-                    { name: "Galaxy Tab A7", cost: 14990 }
-                ],
-                Sony: [
-                    { name: "Bravia X90J", cost: 57990 }
-                ]
-            },
-            Furniture: {
-                Ikea: [
-                    { name: "Billy Bookcase", cost: 2990 }
-                ]
-            }
-        };
-
-        const categorySelect = document.getElementById('category');
-        const brandSelect = document.getElementById('brand');
-        const productSelect = document.getElementById('product');
-        const costDisplay = document.getElementById('cost');
-
-        // Populate categories
-        for (let cat in data) {
-            categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
-        }
-
-        categorySelect.addEventListener('change', () => {
-            const selectedCat = categorySelect.value;
+        document.getElementById('category').addEventListener('change', function () {
+            const categoryId = this.value;
+            const brandSelect = document.getElementById('brand');
             brandSelect.innerHTML = '<option value="">-- Select Brand --</option>';
-            productSelect.innerHTML = '<option value="">-- Select Product --</option>';
-            brandSelect.disabled = true;
-            productSelect.disabled = true;
-            costDisplay.textContent = '₱0.00';
+            document.getElementById('product').innerHTML = '<option value="">-- Select Product --</option>';
+            document.getElementById('cost').textContent = '₱0.00';
 
-            if (selectedCat && data[selectedCat]) {
-                brandSelect.disabled = false;
-                for (let brand in data[selectedCat]) {
-                    brandSelect.innerHTML += `<option value="${brand}">${brand}</option>`;
-                }
+            if (categoryId) {
+                fetch(`/get_brands/${categoryId}`)
+                    .then(response => response.json())
+                    .then(brands => {
+                        brands.forEach(([id, name]) => {
+                            const option = document.createElement('option');
+                            option.value = id;
+                            option.textContent = name;
+                            brandSelect.appendChild(option);
+                        });
+                    });
             }
         });
 
-        brandSelect.addEventListener('change', () => {
-            const selectedCat = categorySelect.value;
-            const selectedBrand = brandSelect.value;
+        document.getElementById('brand').addEventListener('change', function () {
+            const brandId = this.value;
+            const productSelect = document.getElementById('product');
             productSelect.innerHTML = '<option value="">-- Select Product --</option>';
-            productSelect.disabled = true;
-            costDisplay.textContent = '₱0.00';
+            document.getElementById('cost').textContent = '₱0.00';
 
-            if (selectedBrand && data[selectedCat][selectedBrand]) {
-                productSelect.disabled = false;
-                data[selectedCat][selectedBrand].forEach(product => {
-                    productSelect.innerHTML += `<option value="${product.name}" data-cost="${product.cost}">${product.name}</option>`;
-                });
+            if (brandId) {
+                fetch(`/get_products/${brandId}`)
+                    .then(response => response.json())
+                    .then(products => {
+                        products.forEach(([id, name, price]) => {
+                            const option = document.createElement('option');
+                            option.value = id;
+                            option.textContent = name;
+                            option.dataset.price = price;
+                            productSelect.appendChild(option);
+                        });
+                    });
             }
         });
 
-        productSelect.addEventListener('change', () => {
-            const selectedOption = productSelect.options[productSelect.selectedIndex];
-            const cost = selectedOption.getAttribute('data-cost');
-            costDisplay.textContent = cost ? `₱${Number(cost).toLocaleString()}` : '₱0.00';
+        document.getElementById('product').addEventListener('change', function () {
+            const selected = this.options[this.selectedIndex];
+            const price = selected.dataset.price || 0;
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            document.getElementById('cost').textContent = `₱${(price * quantity).toFixed(2)}`;
+        });
+
+        document.getElementById('quantity').addEventListener('input', function () {
+            const productSelect = document.getElementById('product');
+            const selected = productSelect.options[productSelect.selectedIndex];
+            const price = selected ? parseFloat(selected.dataset.price) : 0;
+            const quantity = parseInt(this.value) || 1;
+            document.getElementById('cost').textContent = `₱${(price * quantity).toFixed(2)}`;
         });
     </script>
 </body>
